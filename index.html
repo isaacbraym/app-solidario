@@ -1,9 +1,19 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-theme="light">
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
   <title>App Solidário</title>
+
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json"/>
+  <meta name="theme-color" content="#1B6B3A"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="apple-mobile-web-app-title" content="Solidário"/>
+  <meta name="description" content="Controle de doações e distribuição de cestas básicas"/>
+
+  <!-- Fonte -->
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="css/style.css"/>
@@ -20,7 +30,10 @@
         <div class="header-subtitulo">Associação Esperança Viva</div>
       </div>
     </div>
-    <div class="header-avatar">👤</div>
+    <div class="header-acoes">
+      <button id="btn-tema" onclick="alternarTema()" title="Alternar tema">🌙</button>
+      <div class="header-avatar">👤</div>
+    </div>
   </header>
 
   <!-- CONTEÚDO PRINCIPAL -->
@@ -28,6 +41,17 @@
 
     <!-- TELA: DASHBOARD -->
     <div class="tela ativa" id="tela-inicio">
+
+      <!-- Banner PWA instalável -->
+      <div id="banner-pwa">
+        <span style="font-size:24px">📲</span>
+        <div class="pwa-txt">
+          <div class="pwa-nome">Instalar App Solidário</div>
+          Adicione à tela inicial para acesso offline
+        </div>
+        <button class="btn-instalar" onclick="instalarPwa()">Instalar</button>
+      </div>
+
       <div class="hero-greeting">
         <div class="hero-data" id="data-hoje"></div>
         <div class="hero-txt">Bom dia, Maria! 👋</div>
@@ -37,23 +61,23 @@
       <div class="grid-indicadores">
         <div class="indicador ind-verde">
           <span class="ind-emoji">👨‍👩‍👧‍👦</span>
-          <div class="ind-numero" id="total-familias">47</div>
+          <div class="ind-numero" id="total-familias">—</div>
           <div class="ind-label">Famílias cadastradas</div>
         </div>
         <div class="indicador ind-teal">
           <span class="ind-emoji">📦</span>
-          <div class="ind-numero" id="total-entregas-mes">31</div>
-          <div class="ind-label">Cestas entregues no mês</div>
+          <div class="ind-numero" id="total-entregas-mes">—</div>
+          <div class="ind-label">Cestas entregues</div>
         </div>
         <div class="indicador ind-laranja">
           <span class="ind-emoji">🏪</span>
-          <div class="ind-numero" id="total-itens">7</div>
+          <div class="ind-numero" id="total-itens">—</div>
           <div class="ind-label">Itens em estoque</div>
         </div>
         <div class="indicador ind-vermelho">
           <span class="ind-emoji">⚠️</span>
-          <div class="ind-numero" id="total-baixo-estoque">2</div>
-          <div class="ind-label">Baixo estoque</div>
+          <div class="ind-numero" id="total-baixo-estoque">—</div>
+          <div class="ind-label">Estoque crítico</div>
         </div>
       </div>
 
@@ -61,7 +85,7 @@
         <button class="btn-acao btn-acao-verde" onclick="abrirModal('modal-doacao')">
           <span>💚</span> Nova Doação
         </button>
-        <button class="btn-acao btn-acao-teal" onclick="abrirModal('modal-familia')">
+        <button class="btn-acao btn-acao-teal" onclick="abrirModalNovaFamilia()">
           <span>👪</span> Nova Família
         </button>
         <button class="btn-acao btn-acao-laranja" onclick="abrirModal('modal-entrega')">
@@ -85,9 +109,9 @@
       <div class="secao-header">
         <div>
           <div class="secao-titulo">Famílias</div>
-          <div class="secao-sub" id="familias-count">47 cadastradas</div>
+          <div class="secao-sub" id="familias-count"></div>
         </div>
-        <button class="btn-secundario" onclick="abrirModal('modal-familia')">+ Cadastrar</button>
+        <button class="btn-secundario" onclick="abrirModalNovaFamilia()">+ Cadastrar</button>
       </div>
 
       <div class="busca-wrap">
@@ -112,11 +136,10 @@
       <div class="secao-header">
         <div>
           <div class="secao-titulo">Doações</div>
-          <div class="secao-sub" id="doacoes-count">Registros do mês</div>
+          <div class="secao-sub" id="doacoes-count"></div>
         </div>
         <button class="btn-secundario" onclick="abrirModal('modal-doacao')">+ Registrar</button>
       </div>
-
       <div class="card">
         <div class="card-titulo">📥 Doações recebidas</div>
         <div id="lista-doacoes"></div>
@@ -128,15 +151,13 @@
       <div class="secao-header">
         <div>
           <div class="secao-titulo">Estoque</div>
-          <div class="secao-sub">Nível de produtos disponíveis</div>
+          <div class="secao-sub">Toque em − / + para ajustar</div>
         </div>
       </div>
-
       <div class="busca-wrap">
         <span class="busca-icone">🔍</span>
         <input class="busca-input" type="text" placeholder="Buscar produto..." id="busca-estoque" oninput="filtrarEstoque()"/>
       </div>
-
       <div class="card" id="card-estoque"></div>
     </div>
 
@@ -164,6 +185,12 @@
         </div>
       </div>
 
+      <div class="filtro-periodo">
+        <button class="btn-periodo" onclick="filtrarPeriodo(this,'semana')">Esta semana</button>
+        <button class="btn-periodo ativo" onclick="filtrarPeriodo(this,'mes')">Este mês</button>
+        <button class="btn-periodo" onclick="filtrarPeriodo(this,'tudo')">Todo período</button>
+      </div>
+
       <div class="stat-grid" id="stat-grid"></div>
 
       <div class="card">
@@ -176,7 +203,8 @@
         <div id="relatorio-bairros"></div>
       </div>
 
-      <button class="btn-primario" style="margin-bottom:16px" onclick="mostrarToast('📄 Relatório exportado com sucesso!','verde')">
+      <button class="btn-primario" style="margin-bottom:16px"
+        onclick="mostrarToast('📄 Relatório exportado com sucesso!','verde')">
         📄 Exportar Relatório (PDF)
       </button>
     </div>
@@ -211,12 +239,12 @@
     </button>
   </nav>
 
-  <!-- MODAL: NOVA FAMÍLIA -->
+  <!-- MODAL: FAMÍLIA (criar + editar) -->
   <div class="modal-overlay" id="modal-familia" onclick="fecharModalFora(event,this)">
     <div class="modal-conteudo">
       <div class="modal-handle"></div>
       <div class="modal-titulo">
-        👪 Cadastrar Família
+        <span id="modal-familia-titulo">👪 Cadastrar Família</span>
         <button class="btn-fechar-modal" onclick="fecharModal('modal-familia')">✕</button>
       </div>
       <div class="form-grupo">
@@ -259,11 +287,13 @@
         <label class="form-label">Observações</label>
         <textarea class="form-textarea" id="f-obs" placeholder="Informações adicionais sobre a família..."></textarea>
       </div>
-      <button class="btn-primario" onclick="salvarFamilia()">✅ Cadastrar Família</button>
+      <button class="btn-primario" id="modal-familia-btn" onclick="salvarFamilia()">✅ Cadastrar Família</button>
+      <button class="btn-perigo" id="btn-excluir-familia" style="display:none"
+        onclick="excluirFamilia(familiaEmEdicaoId)">🗑️ Excluir Família</button>
     </div>
   </div>
 
-  <!-- MODAL: NOVA DOAÇÃO -->
+  <!-- MODAL: DOAÇÃO -->
   <div class="modal-overlay" id="modal-doacao" onclick="fecharModalFora(event,this)">
     <div class="modal-conteudo">
       <div class="modal-handle"></div>
@@ -305,7 +335,7 @@
     </div>
   </div>
 
-  <!-- MODAL: NOVA ENTREGA -->
+  <!-- MODAL: ENTREGA -->
   <div class="modal-overlay" id="modal-entrega" onclick="fecharModalFora(event,this)">
     <div class="modal-conteudo">
       <div class="modal-handle"></div>
