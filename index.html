@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+  <title>App Solidário</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="css/style.css"/>
+</head>
+<body>
+<div id="app-wrapper">
+
+  <!-- HEADER -->
+  <header id="header">
+    <div class="header-logo">
+      <div class="logo-icon">🤝</div>
+      <div>
+        <div class="header-titulo">App Solidário</div>
+        <div class="header-subtitulo">Associação Esperança Viva</div>
+      </div>
+    </div>
+    <div class="header-avatar">👤</div>
+  </header>
+
+  <!-- CONTEÚDO PRINCIPAL -->
+  <div id="conteudo">
+
+    <!-- TELA: DASHBOARD -->
+    <div class="tela ativa" id="tela-inicio">
+      <div class="hero-greeting">
+        <div class="hero-data" id="data-hoje"></div>
+        <div class="hero-txt">Bom dia, Maria! 👋</div>
+        <div class="hero-sub">Veja o resumo de hoje</div>
+      </div>
+
+      <div class="grid-indicadores">
+        <div class="indicador ind-verde">
+          <span class="ind-emoji">👨‍👩‍👧‍👦</span>
+          <div class="ind-numero" id="total-familias">47</div>
+          <div class="ind-label">Famílias cadastradas</div>
+        </div>
+        <div class="indicador ind-teal">
+          <span class="ind-emoji">📦</span>
+          <div class="ind-numero" id="total-entregas-mes">31</div>
+          <div class="ind-label">Cestas entregues no mês</div>
+        </div>
+        <div class="indicador ind-laranja">
+          <span class="ind-emoji">🏪</span>
+          <div class="ind-numero" id="total-itens">7</div>
+          <div class="ind-label">Itens em estoque</div>
+        </div>
+        <div class="indicador ind-vermelho">
+          <span class="ind-emoji">⚠️</span>
+          <div class="ind-numero" id="total-baixo-estoque">2</div>
+          <div class="ind-label">Baixo estoque</div>
+        </div>
+      </div>
+
+      <div class="acoes-rapidas">
+        <button class="btn-acao btn-acao-verde" onclick="abrirModal('modal-doacao')">
+          <span>💚</span> Nova Doação
+        </button>
+        <button class="btn-acao btn-acao-teal" onclick="abrirModal('modal-familia')">
+          <span>👪</span> Nova Família
+        </button>
+        <button class="btn-acao btn-acao-laranja" onclick="abrirModal('modal-entrega')">
+          <span>📬</span> Registrar Entrega
+        </button>
+      </div>
+
+      <div class="card">
+        <div class="card-titulo">📊 Doações recebidas na semana</div>
+        <div class="grafico-barras" id="grafico-semana"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-titulo">📋 Últimas atividades</div>
+        <div id="lista-atividades"></div>
+      </div>
+    </div>
+
+    <!-- TELA: FAMÍLIAS -->
+    <div class="tela" id="tela-familias">
+      <div class="secao-header">
+        <div>
+          <div class="secao-titulo">Famílias</div>
+          <div class="secao-sub" id="familias-count">47 cadastradas</div>
+        </div>
+        <button class="btn-secundario" onclick="abrirModal('modal-familia')">+ Cadastrar</button>
+      </div>
+
+      <div class="busca-wrap">
+        <span class="busca-icone">🔍</span>
+        <input class="busca-input" type="text" placeholder="Buscar família ou bairro..." id="busca-familias" oninput="filtrarFamilias()"/>
+      </div>
+
+      <div class="chips-wrap">
+        <button class="chip ativo" onclick="filtrarChip(this,'todas')">Todas</button>
+        <button class="chip" onclick="filtrarChip(this,'alta')">🔴 Alta prioridade</button>
+        <button class="chip" onclick="filtrarChip(this,'media')">🟡 Média</button>
+        <button class="chip" onclick="filtrarChip(this,'normal')">🟢 Normal</button>
+      </div>
+
+      <div class="card">
+        <div id="lista-familias"></div>
+      </div>
+    </div>
+
+    <!-- TELA: DOAÇÕES -->
+    <div class="tela" id="tela-doacoes">
+      <div class="secao-header">
+        <div>
+          <div class="secao-titulo">Doações</div>
+          <div class="secao-sub" id="doacoes-count">Registros do mês</div>
+        </div>
+        <button class="btn-secundario" onclick="abrirModal('modal-doacao')">+ Registrar</button>
+      </div>
+
+      <div class="card">
+        <div class="card-titulo">📥 Doações recebidas</div>
+        <div id="lista-doacoes"></div>
+      </div>
+    </div>
+
+    <!-- TELA: ESTOQUE -->
+    <div class="tela" id="tela-estoque">
+      <div class="secao-header">
+        <div>
+          <div class="secao-titulo">Estoque</div>
+          <div class="secao-sub">Nível de produtos disponíveis</div>
+        </div>
+      </div>
+
+      <div class="busca-wrap">
+        <span class="busca-icone">🔍</span>
+        <input class="busca-input" type="text" placeholder="Buscar produto..." id="busca-estoque" oninput="filtrarEstoque()"/>
+      </div>
+
+      <div class="card" id="card-estoque"></div>
+    </div>
+
+    <!-- TELA: ENTREGAS -->
+    <div class="tela" id="tela-entregas">
+      <div class="secao-header">
+        <div>
+          <div class="secao-titulo">Entregas</div>
+          <div class="secao-sub" id="entregas-count"></div>
+        </div>
+        <button class="btn-secundario" onclick="abrirModal('modal-entrega')">+ Registrar</button>
+      </div>
+      <div class="card">
+        <div class="card-titulo">📬 Histórico de entregas</div>
+        <div id="lista-entregas"></div>
+      </div>
+    </div>
+
+    <!-- TELA: RELATÓRIOS -->
+    <div class="tela" id="tela-relatorios">
+      <div class="secao-header">
+        <div>
+          <div class="secao-titulo">Relatórios</div>
+          <div class="secao-sub">Resumo geral da associação</div>
+        </div>
+      </div>
+
+      <div class="stat-grid" id="stat-grid"></div>
+
+      <div class="card">
+        <div class="card-titulo">🥫 Produtos mais doados</div>
+        <div id="relatorio-produtos"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-titulo">🏘️ Bairros atendidos</div>
+        <div id="relatorio-bairros"></div>
+      </div>
+
+      <button class="btn-primario" style="margin-bottom:16px" onclick="mostrarToast('📄 Relatório exportado com sucesso!','verde')">
+        📄 Exportar Relatório (PDF)
+      </button>
+    </div>
+
+  </div><!-- fim #conteudo -->
+
+  <!-- NAVEGAÇÃO INFERIOR -->
+  <nav id="nav-inferior">
+    <button class="nav-item ativo" onclick="navegarPara('inicio',this)">
+      <span class="nav-icone">🏠</span>
+      <span class="nav-label">Início</span>
+    </button>
+    <button class="nav-item" onclick="navegarPara('familias',this)">
+      <span class="nav-icone">👪</span>
+      <span class="nav-label">Famílias</span>
+    </button>
+    <button class="nav-item" onclick="navegarPara('doacoes',this)">
+      <span class="nav-icone">💚</span>
+      <span class="nav-label">Doações</span>
+    </button>
+    <button class="nav-item" onclick="navegarPara('estoque',this)">
+      <span class="nav-icone">🏪</span>
+      <span class="nav-label">Estoque</span>
+    </button>
+    <button class="nav-item" onclick="navegarPara('entregas',this)">
+      <span class="nav-icone">📬</span>
+      <span class="nav-label">Entregas</span>
+    </button>
+    <button class="nav-item" onclick="navegarPara('relatorios',this)">
+      <span class="nav-icone">📊</span>
+      <span class="nav-label">Relatórios</span>
+    </button>
+  </nav>
+
+  <!-- MODAL: NOVA FAMÍLIA -->
+  <div class="modal-overlay" id="modal-familia" onclick="fecharModalFora(event,this)">
+    <div class="modal-conteudo">
+      <div class="modal-handle"></div>
+      <div class="modal-titulo">
+        👪 Cadastrar Família
+        <button class="btn-fechar-modal" onclick="fecharModal('modal-familia')">✕</button>
+      </div>
+      <div class="form-grupo">
+        <label class="form-label">Nome do Responsável *</label>
+        <input class="form-input" type="text" id="f-responsavel" placeholder="Ex: Ana Maria Santos"/>
+      </div>
+      <div class="form-row">
+        <div class="form-grupo">
+          <label class="form-label">CPF</label>
+          <input class="form-input" type="text" id="f-cpf" placeholder="000.000.000-00"/>
+        </div>
+        <div class="form-grupo">
+          <label class="form-label">Telefone</label>
+          <input class="form-input" type="text" id="f-telefone" placeholder="(00) 00000-0000"/>
+        </div>
+      </div>
+      <div class="form-grupo">
+        <label class="form-label">Endereço</label>
+        <input class="form-input" type="text" id="f-endereco" placeholder="Rua, número"/>
+      </div>
+      <div class="form-row">
+        <div class="form-grupo">
+          <label class="form-label">Bairro</label>
+          <input class="form-input" type="text" id="f-bairro" placeholder="Bairro"/>
+        </div>
+        <div class="form-grupo">
+          <label class="form-label">Moradores</label>
+          <input class="form-input" type="number" id="f-moradores" placeholder="Ex: 4" min="1"/>
+        </div>
+      </div>
+      <div class="form-grupo">
+        <label class="form-label">Prioridade</label>
+        <select class="form-select" id="f-prioridade">
+          <option value="normal">🟢 Normal</option>
+          <option value="media">🟡 Média</option>
+          <option value="alta">🔴 Alta</option>
+        </select>
+      </div>
+      <div class="form-grupo">
+        <label class="form-label">Observações</label>
+        <textarea class="form-textarea" id="f-obs" placeholder="Informações adicionais sobre a família..."></textarea>
+      </div>
+      <button class="btn-primario" onclick="salvarFamilia()">✅ Cadastrar Família</button>
+    </div>
+  </div>
+
+  <!-- MODAL: NOVA DOAÇÃO -->
+  <div class="modal-overlay" id="modal-doacao" onclick="fecharModalFora(event,this)">
+    <div class="modal-conteudo">
+      <div class="modal-handle"></div>
+      <div class="modal-titulo">
+        💚 Registrar Doação
+        <button class="btn-fechar-modal" onclick="fecharModal('modal-doacao')">✕</button>
+      </div>
+      <div class="form-grupo">
+        <label class="form-label">Nome do Doador *</label>
+        <input class="form-input" type="text" id="d-doador" placeholder="Ex: João Carlos Ferreira"/>
+      </div>
+      <div class="form-row">
+        <div class="form-grupo">
+          <label class="form-label">Produto *</label>
+          <select class="form-select" id="d-produto">
+            <option value="Arroz">🍚 Arroz</option>
+            <option value="Feijão">🫘 Feijão</option>
+            <option value="Óleo">🫙 Óleo</option>
+            <option value="Macarrão">🍝 Macarrão</option>
+            <option value="Açúcar">🍬 Açúcar</option>
+            <option value="Leite">🥛 Leite</option>
+            <option value="Farinha">🌾 Farinha</option>
+          </select>
+        </div>
+        <div class="form-grupo">
+          <label class="form-label">Quantidade</label>
+          <input class="form-input" type="number" id="d-quantidade" placeholder="Ex: 10" min="1"/>
+        </div>
+      </div>
+      <div class="form-grupo">
+        <label class="form-label">Data da doação</label>
+        <input class="form-input" type="date" id="d-data"/>
+      </div>
+      <div class="form-grupo">
+        <label class="form-label">Telefone do doador</label>
+        <input class="form-input" type="text" id="d-telefone" placeholder="(00) 00000-0000"/>
+      </div>
+      <button class="btn-primario" onclick="salvarDoacao()">✅ Registrar Doação</button>
+    </div>
+  </div>
+
+  <!-- MODAL: NOVA ENTREGA -->
+  <div class="modal-overlay" id="modal-entrega" onclick="fecharModalFora(event,this)">
+    <div class="modal-conteudo">
+      <div class="modal-handle"></div>
+      <div class="modal-titulo">
+        📬 Registrar Entrega
+        <button class="btn-fechar-modal" onclick="fecharModal('modal-entrega')">✕</button>
+      </div>
+      <div class="form-grupo">
+        <label class="form-label">Família beneficiada *</label>
+        <select class="form-select" id="e-familia"></select>
+      </div>
+      <div class="form-grupo">
+        <label class="form-label">Responsável pela entrega</label>
+        <input class="form-input" type="text" id="e-responsavel" placeholder="Ex: Carlos Mendes"/>
+      </div>
+      <div class="form-grupo">
+        <label class="form-label">Data da entrega</label>
+        <input class="form-input" type="date" id="e-data"/>
+      </div>
+      <div class="form-grupo">
+        <label class="form-label">Observações</label>
+        <textarea class="form-textarea" id="e-obs" placeholder="Observações sobre a entrega..."></textarea>
+      </div>
+      <button class="btn-primario" onclick="salvarEntrega()">✅ Registrar Entrega</button>
+    </div>
+  </div>
+
+</div><!-- fim #app-wrapper -->
+
+<script src="js/dados.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
