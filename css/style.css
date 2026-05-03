@@ -70,10 +70,16 @@ html, body {
   transition: var(--transicao-tema);
 }
 
+/* Garante que dvh esteja disponível como fallback */
+@supports not (height: 100dvh) {
+  :root { --vh: 1vh; }
+}
+
 /* ===== WRAPPER DO CELULAR ===== */
 #app-wrapper {
   width: 100%;
   max-width: 430px;
+  height: 100vh;
   height: 100dvh;
   margin: 0 auto;
   background: var(--cinza-bg);
@@ -86,8 +92,19 @@ html, body {
 }
 
 @media (min-width: 500px) {
-  body { display: flex; align-items: center; justify-content: center; min-height: 100vh; }
-  #app-wrapper { height: 820px; border-radius: 32px; }
+  body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    min-height: 100dvh;
+    padding: 20px;
+  }
+  #app-wrapper {
+    height: min(820px, calc(100vh - 40px));
+    height: min(820px, calc(100dvh - 40px));
+    border-radius: 32px;
+  }
 }
 
 /* ===== HEADER ===== */
@@ -151,9 +168,10 @@ html, body {
 /* ===== CONTEÚDO PRINCIPAL ===== */
 #conteudo {
   flex: 1;
+  min-height: 0; /* essencial: permite que o flex child encolha e role */
   overflow-y: auto;
   overflow-x: hidden;
-  padding-bottom: var(--nav-height);
+  padding-bottom: 0;
   scroll-behavior: smooth;
 }
 #conteudo::-webkit-scrollbar { display: none; }
@@ -427,8 +445,7 @@ html, body {
   background: var(--cinza-card);
   display: flex; align-items: stretch;
   border-top: 1px solid var(--cinza-borda);
-  flex-shrink: 0;
-  position: absolute; bottom: 0; left: 0; right: 0;
+  flex-shrink: 0; /* fica no fluxo flex normal, sem position absolute */
   box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
   z-index: 20;
   transition: var(--transicao-tema);
@@ -510,7 +527,7 @@ html, body {
 
 /* ===== TOAST ===== */
 .toast {
-  position: absolute; top: calc(var(--header-height) + 12px); left: 16px; right: 16px;
+  position: absolute; top: calc(var(--header-height) + 12px); left: 16px; right: 16px; z-index: 201;
   background: var(--texto-principal); color: #fff;
   padding: 14px 18px; border-radius: 14px;
   font-size: 14px; font-weight: 500;
