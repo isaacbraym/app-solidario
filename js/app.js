@@ -57,15 +57,35 @@ function alternarTema() {
 }
 
 /* ===========================
-   NAVEGAÇÃO
+   NAVEGAÇÃO COM SLIDE DIRECIONAL
    =========================== */
-function navegarPara(tela, botaoNav) {
-  document.querySelectorAll('.tela').forEach(t => t.classList.remove('ativa'));
-  document.getElementById('tela-' + tela).classList.add('ativa');
+const ORDEM_TELAS = ['inicio','familias','doacoes','estoque','entregas','relatorios'];
+let telaAtual = 'inicio';
+
+function navegarPara(proximaTela, botaoNav) {
+  if (proximaTela === telaAtual) return;
+
+  const indiceAtual   = ORDEM_TELAS.indexOf(telaAtual);
+  const indiceProxima = ORDEM_TELAS.indexOf(proximaTela);
+  const vaiParaDireita = indiceProxima > indiceAtual;
+
+  const telaAnteriorEl = document.getElementById('tela-' + telaAtual);
+  const telaProximaEl  = document.getElementById('tela-' + proximaTela);
+
+  telaProximaEl.classList.add('ativa');
+  telaProximaEl.classList.add(vaiParaDireita ? 'slide-entrar-direita' : 'slide-entrar-esquerda');
+  telaAnteriorEl.classList.add(vaiParaDireita ? 'slide-sair-esquerda' : 'slide-sair-direita');
+
+  setTimeout(() => {
+    telaAnteriorEl.classList.remove('ativa','slide-sair-esquerda','slide-sair-direita');
+    telaProximaEl.classList.remove('slide-entrar-direita','slide-entrar-esquerda');
+    telaAtual = proximaTela;
+  }, 300);
+
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('ativo'));
   botaoNav.classList.add('ativo');
   document.getElementById('conteudo').scrollTop = 0;
-  renderizarTela(tela);
+  renderizarTela(proximaTela);
 }
 
 function renderizarTela(tela) {
@@ -577,9 +597,55 @@ function formatarDataBR(iso) {
 }
 
 /* ===========================
+   PERSISTÊNCIA — localStorage
+   =========================== */
+const CHAVE_STORAGE = 'appSolidario_v2';
+
+function salvarDados() {
+  try {
+    localStorage.setItem(CHAVE_STORAGE, JSON.stringify({ familias, doacoes, estoque, entregas }));
+  } catch (_) {}
+}
+
+function carregarDados() {
+  try {
+    const salvo = localStorage.getItem(CHAVE_STORAGE);
+    if (!salvo) return;
+    const dados = JSON.parse(salvo);
+    if (dados.familias?.length) familias = dados.familias;
+    if (dados.doacoes?.length)  doacoes  = dados.doacoes;
+    if (dados.estoque?.length)  estoque  = dados.estoque;
+    if (dados.entregas?.length) entregas = dados.entregas;
+  } catch (_) {}
+}
+
+function comAutoSave(fn) {
+  return function(...args) {
+    fn.apply(this, args);
+    salvarDados();
+  };
+}
+
+/* ===========================
+   SPLASH SCREEN
+   =========================== */
+function exibirSplash() {
+  return new Promise(resolve => {
+    setTimeout(() => {
+      document.getElementById('splash').classList.add('saindo');
+      setTimeout(() => {
+        document.getElementById('splash').classList.add('oculto');
+        resolve();
+      }, 500);
+    }, 1400);
+  });
+}
+
+/* ===========================
    INICIALIZAÇÃO
    =========================== */
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  carregarDados();
   inicializarTema();
   renderDashboard();
   renderFamilias();
@@ -587,4 +653,15 @@ document.addEventListener('DOMContentLoaded', () => {
   renderEstoque();
   renderEntregas();
   renderRelatorios();
+  await exibirSplash();
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+  salvarFamilia  = comAutoSave(salvarFamilia);
+  salvarDoacao   = comAutoSave(salvarDoacao);
+  salvarEntrega  = comAutoSave(salvarEntrega);
+  excluirFamilia = comAutoSave(excluirFamilia);
+  excluirDoacao  = comAutoSave(excluirDoacao);
+  excluirEntrega = comAutoSave(excluirEntrega);
+  ajustarEstoque = comAutoSave(ajustarEstoque);
 });
